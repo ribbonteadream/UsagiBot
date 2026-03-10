@@ -103,14 +103,16 @@ async def removereactiontrigger(interaction: discord.Interaction, trigger: str):
 @bot.tree.command()
 @discord.app_commands.default_permissions(moderate_members=True)
 @discord.app_commands.checks.has_permissions(moderate_members=True)
-async def timeout(interaction: discord.Interaction, user: discord.Member, length: datetime.timedelta, reason: str | None = None):
+@discord.app_commands.describe(length="The integer number of minutes you want to time someone out for")
+async def timeout(interaction: discord.Interaction, user: discord.Member, length: int, reason: str | None = None):
     """Applies a timeout to the user in the guild, sending a DM to them as well as putting it in the mod log"""
+    delta = datetime.timedelta(minutes=int(length))
     channel = bot.get_channel(MODLOG_CHANNEL_ID)
     if type(channel) == discord.TextChannel:
-        await channel.send(f"{user.display_name} has been timed out for {length.total_seconds()} seconds by {interaction.user.display_name}!{f"\n{reason}" if reason != None else ''}")
-    await user.send(f"You have been timed out from {interaction.guild} for {length.total_seconds()} seconds!{f"\n{reason}" if reason != None else ''}")
-    await user.timeout(length, reason=reason)
-    await interaction.response.send_message(f"Timed out {user.display_name} for {length.total_seconds()} seconds!", ephemeral=True)
+        await channel.send(f"{user.display_name} has been timed out for {length} minute(s) by {interaction.user.display_name}!{f"\n{reason}" if reason != None else ''}")
+    await user.send(f"You have been timed out from {interaction.guild} for {length} minute(s)!{f"\n{reason}" if reason != None else ''}")
+    await user.timeout(delta, reason=reason)
+    await interaction.response.send_message(f"Timed out {user.display_name} for {length} minute(s)!", ephemeral=True)
 
 @bot.tree.command()
 @discord.app_commands.default_permissions(moderate_members=True)
